@@ -1,6 +1,9 @@
 #ifndef __FT_UART_H__
 # define __FT_UART_H__
 
+# include <stdint.h>
+
+
 # define ROUND(n)   (uint16_t) ((n + .5 >= ((uint16_t) n) + 1) ? (n + 1) : (n))
 
 # define UART_BAUDRATE  BAUD_RATE
@@ -17,6 +20,14 @@
 # define DATA_BITS_8        (3 << UCSZ00)
 # define NO_PARITY_BITS     (1 << UPM00)
 # define STOP_BIT_1         (0 << USBS0)
+
+# define BACKSPACE  0x7F
+# define ENTER      0x0D
+
+# define LOGIN_MODE  0
+# define PASS_MODE   1
+# define MAX_LOGIN_LENGTH   64
+# define MAX_PASS_LENGTH    64
 
 
 void uart_init(void);

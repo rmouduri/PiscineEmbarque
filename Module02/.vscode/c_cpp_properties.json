@@ -9,7 +9,9 @@
             "defines": [
                 "__AVR_ATmega328P__",
                 "F_CPU=16000000UL",
-                "BAUD_RATE=115200UL"
+                "BAUD_RATE=115200UL",
+                "LOGIN=\"piscine\"",
+                "PASS=\"embarque\""
             ],
             "compilerPath": "/usr/bin/clang",
             "cStandard": "c17",

@@ -39,9 +39,17 @@ inline void uart_printstr(const char *s) {
     while (*s > 0) uart_tx(*s++);
 }
 
+static inline void print_debug(const uint8_t n) {
+    const char base[10] = "0123456789";
+
+    uart_printstr(": ");
+    uart_print_number(n, base, sizeof(base));
+    uart_printstr("\r\n");
+}
+
 inline void uart_print_number(int32_t n, const char *base, const uint8_t base_len) {
     if (n == INT32_MIN) {
-        return uart_printstr("-2147483647");
+        return uart_printstr("-2147483648"); // For base 10 only
     } else if (n < 0) {
         n *= -1;
         uart_tx('-');
@@ -51,15 +59,90 @@ inline void uart_print_number(int32_t n, const char *base, const uint8_t base_le
         uart_print_number(n / base_len, base, base_len);
     }
 
-    uart_tx((n % base_len) + '0');
+    uart_tx(base[n % base_len]);
+}
+
+
+uint8_t state = LOGIN_MODE, input_len = 0;
+char login[MAX_LOGIN_LENGTH] = { 0 }, pass[MAX_PASS_LENGTH] = { 0 };
+
+
+static inline void clear_credentials(void) {
+    uint8_t i = 0;
+
+    while (i < MAX_LOGIN_LENGTH) login[i++] = 0;
+
+    i = 0;
+    while (i < MAX_PASS_LENGTH) pass[i++] = 0;
+}
+
+static inline uint8_t check_login(void) {
+    uint8_t i = 0;
+
+    while (i < MAX_LOGIN_LENGTH - 2 && login[i + 1] && LOGIN[i + 1]) {
+        if (login[i] != LOGIN[i]) {
+            return 0;
+        }
+
+        ++i;
+    }
+
+    ++i;
+    return login[i] == LOGIN[i];
+}
+
+static inline uint8_t check_pass(void) {
+    uint8_t i = 0;
+
+    while (i < MAX_PASS_LENGTH - 2 && pass[i + 1] && PASS[i + 1]) {
+        if (pass[i] != PASS[i]) {
+            return 0;
+        }
+
+        ++i;
+    }
+
+    ++i;
+    return pass[i] == PASS[i];
+}
+
+static inline void handle_enter(void) {
+    uart_printstr("\r\n");
+
+    if (state == LOGIN_MODE) {
+        if (check_login()) uart_printstr("LOGIN VALID !");
+        else uart_printstr("LOGIN INVALID !");
+    } else {
+        if (check_pass()) uart_printstr("PASS VALID !");
+        else uart_printstr("PASS INVALID !");
+
+        clear_credentials();
+    }
+    uart_printstr("\r\n");
+
+    input_len = 0;
+    state = !state;
+}
+
+static inline void handle_backspace(void) {
+    if (input_len) {
+        if (state == LOGIN_MODE) login[--input_len] = 0;
+        else if (state == PASS_MODE) pass[--input_len] = 0;
+
+        uart_printstr("\b \b");
+    }
 }
 
 static inline void handle_input(const char c) {
-    if (c == '\r') {
-        uart_printstr("\r\n");
-    } else if (c == 0x7F) {
-        uart_printstr("\r\b");
-    } else {
+    if (c == ENTER) {
+        handle_enter();
+    } else if (c == BACKSPACE) {
+        handle_backspace();
+    } else if (state == LOGIN_MODE && input_len < MAX_LOGIN_LENGTH) {
+        login[input_len++] = c;
+        uart_tx(c);
+    } else if (state == PASS_MODE && input_len < MAX_PASS_LENGTH) {
+        pass[input_len++] = c;
         uart_tx(c);
     }
 }
@@ -69,10 +152,4 @@ ISR(USART_RX_vect)
     char c = uart_rx();
 
     handle_input(c);
-
-    const char *base = "0123456789";
-
-    uart_printstr(": ");
-    uart_print_number(c, base, 10);
-    uart_printstr("\r\n");
 }

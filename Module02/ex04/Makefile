@@ -7,7 +7,7 @@ CC =		avr-gcc
 OBJ_COPY =	avr-objcopy
 FLASH =		avrdude
 
-CFLAGS =	-Wall -Wextra -Werror -Wunused -O3 -mmcu=$(CPU) -DF_CPU=$(F_CPU) -DBAUD_RATE=$(BAUD_RATE)
+CFLAGS =	-Wall -Wextra -Werror -Wunused -O3 -mmcu=$(CPU) -DF_CPU=$(F_CPU) -DBAUD_RATE=$(BAUD_RATE) -DLOGIN=\"$(LOGIN)\" -DPASS=\"$(PASS)\"
 INCLUDES =	-Iinclude
 
 CPU =		atmega328p
@@ -15,6 +15,9 @@ BAUD_RATE = 115200
 F_CPU =		16000000UL
 PROG_ID =	arduino
 PORT =		/dev/ttyUSB0
+
+LOGIN =		piscine
+PASS =		embarque
 
 SRCS_DIR =	src
 OBJS_DIR =	.objs
