@@ -21,7 +21,7 @@
 # define BACKSPACE          0x8
 
 
-void uart_init(void);
+void init_uart(void);
 void uart_tx(const char c);
 char uart_rx(void);
 void uart_printstr(const char *s);

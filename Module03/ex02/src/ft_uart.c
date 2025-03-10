@@ -4,7 +4,7 @@
 #include "ft_uart.h"
 
 
-inline void uart_init(void) {
+inline void init_uart(void) {
     // http://www.rjhcoding.com/avrc-uart.php : Setting Baud Rate
     // UBRR is a 12-bit register, UBRR0L takes 8 lower bits and UBRR0H takes 4 higher bits
     UBRR0L = UBRRN & 0xFF;

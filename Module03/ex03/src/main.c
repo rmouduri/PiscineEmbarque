@@ -2,15 +2,12 @@
 #include <util/delay.h>
 
 #include "ft_rgb.h"
+#include "ft_uart.h"
 
 
 int main() {
-    uint8_t i = 0;
-
     init_rgb();
+    init_uart();
 
-    for (;;) {
-        wheel(i++);
-        _delay_ms(10);
-    }
+    for (;;);
 }

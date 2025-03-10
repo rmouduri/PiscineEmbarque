@@ -41,10 +41,7 @@ inline void uart_printstr(const char *s) {
 
 ISR(USART_RX_vect)
 {
-    char c = uart_rx();
-
-    if (c >= 'A' && c <= 'Z') c += 32;
-    else if (c >= 'a' && c <= 'z') c -= 32;
+    const char c = uart_rx();
 
     uart_tx(c);
 }

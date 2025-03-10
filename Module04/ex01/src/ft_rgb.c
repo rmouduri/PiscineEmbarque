@@ -13,7 +13,7 @@ inline void init_rgb(void) {
 
     // Clear OC0B (Red LED) on compare match, set OC0B (Red LED) at BOTTOM
     TCCR0A |= (1 << COM0B1);
-    // Clear OC0A (Green LED) on compare match, set OC0A (Green LED) at BOTTOM
+    // Clear OC0B (Green LED) on compare match, set OC0B (Green LED) at BOTTOM
     TCCR0A |= (1 << COM0A1);
 
     // Set TCCR0B prescaler to 1024: Table 14-9. Clock Select Bit Description
@@ -31,8 +31,8 @@ inline void init_rgb(void) {
 }
 
 inline void set_rgb(const uint8_t r, const uint8_t g, const uint8_t b) {
-    OCR0B = r;
-    OCR0A = g;
+    OCR0A = r;
+    OCR0B = g;
     OCR2B = b;
 }
 

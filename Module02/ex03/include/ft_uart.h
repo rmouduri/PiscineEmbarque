@@ -18,8 +18,6 @@
 # define NO_PARITY_BITS     (1 << UPM00)
 # define STOP_BIT_1         (0 << USBS0)
 
-# define BACKSPACE          0x8
-
 
 void uart_init(void);
 void uart_tx(const char c);

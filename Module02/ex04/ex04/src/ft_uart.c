@@ -84,6 +84,7 @@ static inline void reset_prompt(void) {
 void init_prompt(void) {
     clear_credentials();
     reset_prompt();
+
 }
 
 static inline uint8_t check_login(void) {

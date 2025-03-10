@@ -18,10 +18,15 @@
 # define NO_PARITY_BITS     (1 << UPM00)
 # define STOP_BIT_1         (0 << USBS0)
 
-# define BACKSPACE          0x8
+# define BACKSPACE  0x7F
+# define ENTER      0x0D
+
+# define COLOR_LENGTH   6
+# define SUCCESS    0
+# define FAILURE    1
 
 
-void uart_init(void);
+void init_uart(void);
 void uart_tx(const char c);
 char uart_rx(void);
 void uart_printstr(const char *s);
