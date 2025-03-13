@@ -18,6 +18,9 @@ typedef struct eeprom_input_s {
 } eeprom_input_t;
 
 
+inline static void reset_eeprom(void) {
+    for (int i = 0; i < 1024; ++i) eeprom_write(i % 256 != EEPROM_ID ? i % 256 : 0x0, i);
+}
 
 inline static void add_key_value(const char *key, const char *value, uint16_t addr) {
     eeprom_write(EEPROM_ID, addr);
@@ -49,16 +52,6 @@ inline static uint8_t eeprom_memcmp(uint16_t addr, const char *cmp) {
         ++i;
     }
 
-    // uart_printstr("[memcmp] i: ");
-    // uart_print_number_base(i, "0123456789", 10);
-    // uart_printstr(", addr: ");
-    // uart_print_number_base(addr, "0123456789abcdef", 16);
-    // uart_printstr(", !cmp[i]: ");
-    // uart_print_number_base(cmp[i] == 0, "0123456789", 10);
-    // uart_printstr(", eeprom_read(addr) == EEPROM_ID: ");
-    // uart_print_number_base(eeprom_read(addr) == EEPROM_ID, "0123456789", 10);
-    // uart_printstr("\r\n");
-
     return !(cmp[i] == 0 && eeprom_read(addr) == EEPROM_ID);
 }
 
@@ -74,6 +67,16 @@ inline static void eeprom_key_read(const char *key) {
 
             if (eeprom_memcmp(pos, key) == 0) {
                 break ;
+            } else {
+                uint8_t eeprom_id_cnt = 0;
+
+                while (pos < 1024 && eeprom_id_cnt < 3) {
+                    if (eeprom_read(pos) == EEPROM_ID) ++eeprom_id_cnt;
+
+                    ++pos;
+                }
+
+                --pos;
             }
         }
     }
@@ -116,6 +119,16 @@ inline static void eeprom_key_forget(const char *key) {
 
             if (eeprom_memcmp(pos, key) == 0) {
                 break ;
+            } else {
+                uint8_t eeprom_id_cnt = 0;
+
+                while (pos < 1024 && eeprom_id_cnt < 3) {
+                    if (eeprom_read(pos) == EEPROM_ID) ++eeprom_id_cnt;
+
+                    ++pos;
+                }
+
+                --pos;
             }
         }
     }
@@ -146,6 +159,71 @@ inline static void eeprom_key_forget(const char *key) {
     eeprom_write(0x0, pos - val_index - 1);
     eeprom_write(0x0, pos);
     eeprom_write(0x0, pos + 1);
+}
+
+inline static int16_t find_free_eeprom_room(const uint16_t length) {
+    uint16_t addr = 0;
+
+    for (uint16_t i = 0; (i < 1024 - length) && (i - addr < length); ++i) {
+        if (eeprom_read(i) == EEPROM_ID && eeprom_read(i + 1) == EEPROM_ID) {
+            uint8_t eeprom_id_cnt = 0;
+
+            i += 2;
+            while (i < 1024 && eeprom_id_cnt < 3) {
+                if (eeprom_read(i) == EEPROM_ID) ++eeprom_id_cnt;
+                
+                ++i;
+            }
+            
+            addr = i;
+
+            --i;
+        }
+    }
+
+    if (addr >= 1024 - length) return -1;
+
+    return addr;
+}
+
+inline static void eeprom_key_write(const char *key, const char *val) {
+    uint16_t pos = 0;
+
+    for (; pos < 1024; ++pos) {
+        const uint8_t data = eeprom_read(pos);
+
+        if (data == EEPROM_ID && eeprom_read(pos + 1) == EEPROM_ID) {
+            pos += 2;
+
+            if (eeprom_memcmp(pos, key) == 0) {
+                uart_printstr("key exists\r\n");
+                return ;
+            } else {
+                uint8_t eeprom_id_cnt = 0;
+
+                while (pos < 1024 && eeprom_id_cnt < 3) {
+                    if (eeprom_read(pos) == EEPROM_ID) ++eeprom_id_cnt;
+
+                    ++pos;
+                }
+
+                --pos;
+            }
+        }
+    }
+
+    const uint16_t length = 5 + strlen(key) + strlen(val);
+    const int16_t addr = find_free_eeprom_room(length);
+
+    if (addr == -1) {
+        uart_printstr("no space left\r\n");
+        return ;
+    }
+
+    add_key_value(key, val, addr);
+    uart_printstr("done: 0x");
+    uart_print_number_base(addr, "0123456789abcdef", 16);
+    uart_printstr("\r\n");
 }
 
 inline static uint8_t get_val(eeprom_input_t *ei) {
@@ -246,11 +324,13 @@ inline static void handle_enter(eeprom_input_t *eeprom_input) {
         if (strncmp(eeprom_input->input, "READ", 4) == 0) {
             eeprom_key_read(eeprom_input->key);
         } else if (strncmp(eeprom_input->input, "WRITE", 5) == 0) {
-            // eeprom_key_write(eeprom_input->key, eeprom_input->val);
+            eeprom_key_write(eeprom_input->key, eeprom_input->val);
         } else if (strncmp(eeprom_input->input, "FORGET", 6) == 0) {
             eeprom_key_forget(eeprom_input->key);
         } else if (strncmp(eeprom_input->input, "PRINT", 5) == 0) {
             print_eeprom(1, 0x0, 0x3ff, -1);
+        } else if (strncmp(eeprom_input->input, "RESET", 5) == 0) {
+            reset_eeprom();
         } else {
             uart_printstr(RED"Invalid command.\r\n"RESET_COLOR);
         }
@@ -289,8 +369,6 @@ int main() {
     eeprom_input_t   eeprom_input = { 0 };
 
     init_uart();
-
-    add_key_value("MY_KEY_42", "MY_VALUE_42", 0x42);
 
     uart_printstr("> ");
     for (;;) {
