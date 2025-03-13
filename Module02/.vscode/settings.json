@@ -1,0 +1,14 @@
+{
+    "files.associations": {
+        "io.h": "c",
+        "iom328p.h": "c",
+        "iom3250.h": "c",
+        "delay.h": "c",
+        "btn_states.h": "c",
+        "ft_delay.h": "c",
+        "stdint.h": "c",
+        "ft_uart.h": "c",
+        "ft_timer.h": "c",
+        "interrupt.h": "c"
+    }
+}
