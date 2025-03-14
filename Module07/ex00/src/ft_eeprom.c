@@ -14,10 +14,14 @@ inline void eeprom_write(const uint8_t data, const uint32_t addr) {
     // Set Data to write to EEPROM
     EEDR = data;
 
+    // Stop interruption while writing to EEPROM
+    __asm__ __volatile__ ("cli" ::: "memory");
     // EEPROM Master Write Enable
     EECR |= (1 << EEMPE);
     // Start EEPROM Write
     EECR |= (1 << EEPE);
+    // Accept interruption
+    __asm__ __volatile__ ("sei" ::: "memory");
 }
 
 inline uint8_t eeprom_read(const uint32_t addr) {
