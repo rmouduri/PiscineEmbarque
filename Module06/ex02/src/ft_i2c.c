@@ -109,8 +109,6 @@ inline static void aht20_trigger_measurement(void) {
 }
 
 inline static void get_aht_raw_packet(uint8_t *dest) {
-    aht20_trigger_measurement();
-
     for (;;) {
         i2c_init();
         aht20_connect(I2C_READ_MODE);
