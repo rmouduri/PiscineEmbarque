@@ -15,10 +15,17 @@ typedef struct led_frame_s {
 # define LED_FRAME_START    0b111
 # define LED_INTENSITY      0x4
 
+# define DEFAULT_LED_FRAME  { \
+    .red = 0, \
+    .green = 0, \
+    .blue = 0, \
+    .intensity = LED_INTENSITY, \
+    .led_frame_start = LED_FRAME_START \
+}
+
 void init_spi(void);
 void send_spi(const uint32_t data);
-led_frame_t get_led_frame(const uint8_t r, const uint8_t g, const uint8_t b, const uint8_t intensity);
+led_frame_t get_led_frame(const uint8_t r, const uint8_t g, const uint8_t b);
 void set_rgb_spi(const led_frame_t d6, const led_frame_t d7, const led_frame_t d8);
-void spi_rgb_wheel(uint8_t pos);
 
 #endif // __FT_SPI_H__

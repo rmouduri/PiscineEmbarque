@@ -11,7 +11,7 @@ inline void init_uart(void) {
     UBRR0H = UBRRN >> 8;
     
     // Enable UART Transmitter, Receiver and RX Interruption
-    UCSR0B |= UART_TRANSMITTER | UART_RECEIVER; // | UART_RX_INTERRUPT;
+    UCSR0B |= UART_TRANSMITTER | UART_RECEIVER | UART_RX_INTERRUPT;
 
     // 8 Data Bits | No Parity Bits | 1 Stop Bit
     UCSR0C |= DATA_BITS_8 | NO_PARITY_BITS | STOP_BIT_1;
