@@ -89,6 +89,7 @@ int main() {
             set_led(&leds[led_index], color_index, saved_color);
             led_index = (led_index + 1) % 4;
             color_index = 0;
+            saved_color = color_index == 0 ? (leds[led_index].red) : (color_index == 1 ? leds[led_index].green : leds[led_index].blue);
         }
 
         if (led_index != 3) {
