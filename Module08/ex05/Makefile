@@ -1,4 +1,4 @@
-NAME =			ex04
+NAME =			ex05
 NAME_BIN =		$(NAME).bin
 NAME_HEX =		$(NAME).hex
 
